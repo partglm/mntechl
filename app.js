@@ -114,3 +114,40 @@ if you don't know what's the word you want here is the full list of words:
 
 ////use npm run start to test you program 
 ////you can edit below this line !!!!!!!!!!
+
+const express = require('express')
+const http = require('http');
+const path = require('path');
+const socketIO = require('socket.io')
+
+const app = express()
+const server = http.createServer(app)
+const io = socketIO(server)
+const PORT = process.env.PORT || 8080;
+
+app.use(express.json())
+const htmlpath = '/html/'
+
+let caseplayeds = []
+let playerplayed = null
+
+io.on('connection', (socket) => {
+    socket.on('morpion', ({player, caseplayedid}) => {
+        console.log(player +"  "+ caseplayedid)
+
+        if (caseplayeds.includes(caseplayedid)) return
+        if (playerplayed == player) return
+        
+        playerplayed = player 
+        caseplayeds.push(caseplayedid)
+        io.emit('result', ({player, caseplayedid}))
+    })
+})
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, htmlpath, 'home.html'))
+})
+
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on port ${PORT} on this URL : http://localhost:${PORT}`);
+});
