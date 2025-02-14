@@ -53,7 +53,7 @@ if you don't know what's the word you want here is the full list of words:
     fr.nouveau
     fr.supprimer
     fr.dans
-    fr.retourner
+    fr.retouner
     fr.asynchroniser
     fr.attendre
     fr.promesse
@@ -115,39 +115,66 @@ if you don't know what's the word you want here is the full list of words:
 ////use npm run start to test you program 
 ////you can edit below this line !!!!!!!!!!
 
-const express = require('express')
-const http = require('http');
-const path = require('path');
-const socketIO = require('socket.io')
+fr.definir express = require('express')
+fr.definir http = require('http');
+fr.definir path = require('path');
+fr.definir socketIO = require('socket.io')
 
-const app = express()
-const server = http.createServer(app)
-const io = socketIO(server)
-const PORT = process.env.PORT || 8080;
+fr.definir app = express()
+fr.definir server = http.createServer(app)
+fr.definir io = socketIO(server)
+fr.definir PORT = process.env.PORT fr.ou 8080;
 
 app.use(express.json())
-const htmlpath = '/html/'
+fr.definir htmlpath = '/html/'
 
-let caseplayeds = []
-let playerplayed = null
+fr.definir caseplayeds1 = []
+fr.definir caseplayeds2 = []
+fr.definir playerplayed = fr.nul
+fr.definir winningCombinations = [
+    ['0', '1', '2'], ['3', '4', '5'], ['6', '7', '8'], // Lignes
+    ['0', '3', '6'], ['1', '4', '7'], ['2', '5', '8'], // Colonnes
+    ['0', '4', '8'], ['2', '4', '6'] // Diagonales
+];
+
 
 io.on('connection', (socket) => {
     socket.on('morpion', ({player, caseplayedid}) => {
-        console.log(player +"  "+ caseplayedid)
+        afficher(player +"  "+ caseplayedid)
 
-        if (caseplayeds.includes(caseplayedid)) return
-        if (playerplayed == player) return
+        fr.si (playerplayed == player) fr.retouner
+        fr.si (caseplayeds1.includes(caseplayedid)) fr.retouner
+        fr.si (caseplayeds2.includes(caseplayedid)) fr.retouner
         
         playerplayed = player 
-        caseplayeds.push(caseplayedid)
+        fr.si (playerplayed == '1') caseplayeds1.push(caseplayedid)
+        fr.si (playerplayed == '2') caseplayeds2.push(caseplayedid)
+
         io.emit('result', ({player, caseplayedid}))
-    })
-})
+
+        fr.si (checkWinner(player)) {
+            io.emit('winner', player);
+        }
+    });
+});
+
+fr.fonction checkWinner(player) {
+    fr.si (player == '1') {   
+        fr.retouner winningCombinations.some(combination =>
+            combination.every(index => caseplayeds1.includes(index))
+        )
+    }
+    fr.si (player == '2') {   
+        fr.retouner winningCombinations.some(combination =>
+            combination.every(index => caseplayeds2.includes(index))
+        )
+    }
+}
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, htmlpath, 'home.html'))
 })
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT} on this URL : http://localhost:${PORT}`);
+    afficher(`Server running on port ${PORT} on this URL : http://localhost:${PORT}`);
 });
